@@ -34,7 +34,8 @@ void SVGinit(SVGwriter *svg, char *nom, int sizeX, int sizeY) {
   fprintf(svg->file, " viewBox=\"%lf %lf %lf %lf\"", -2.0, -2.0, sizeX+7.0, sizeY+7.0);
   fprintf(svg->file, " preserveAspectRatio=\"yes\">\n");
   fprintf(svg->file, "<g >\n\n");
- 
+
+   svg->lineColor[0]='#';
 }
 
 

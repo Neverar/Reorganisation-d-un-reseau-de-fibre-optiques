@@ -11,6 +11,7 @@ typedef struct cellPoint{
 /* Celllule d une liste (chainee) de chaines */
 typedef struct cellChaine{
   int numero;                   /* Numero de la chaine */
+  int nbPoints;					/*Nombre des points*/
   CellPoint *points;            /* Liste des points de la chaine */
   struct cellChaine *suiv;      /* Cellule suivante dans la liste */
 } CellChaine;

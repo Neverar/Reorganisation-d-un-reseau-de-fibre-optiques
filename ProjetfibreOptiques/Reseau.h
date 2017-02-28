@@ -39,3 +39,4 @@ int nbLiaison(Reseau *R);
 int nbCommodite(Reseau *R);
 void afficheReseauSVG(Reseau *R, char* nomInstance);
 #endif
+
