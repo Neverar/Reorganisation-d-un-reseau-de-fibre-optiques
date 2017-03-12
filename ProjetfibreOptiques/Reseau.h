@@ -2,6 +2,7 @@
 #define __RESEAU_H__
 
 #include "Chaine.h"
+#include "StructHachage.h"
 
 typedef struct noeud Noeud;
 
@@ -38,5 +39,9 @@ void ecrireReseauTxt(Reseau *R, FILE *f);
 int nbLiaison(Reseau *R);
 int nbCommodite(Reseau *R);
 void afficheReseauSVG(Reseau *R, char* nomInstance);
+void majDesVoisins(Noeud *noeud, Noeud *voisin);
+
+Noeud* rechercheCreeNoeudHachage(Reseau *R, TableHachage *H, double x, double y);
+Reseau* recreeReseauHachage(Chaines *C);
 #endif
 
