@@ -88,7 +88,7 @@ void majDesVoisins(Noeud *noeud, Noeud *voisins) {
 	pv = noeud->voisins;
 	while (pv) pv = pv->suiv;
 	pv = malloc(sizeof(CellNoeud));
-	pv->nd = voisins;                /*Ajoute plusieurs fois?*/
+	pv->nd = voisins;                /*A Verifier si le voisin est deja dans la liste*/
 	pv->suiv = NULL;
 }
 
