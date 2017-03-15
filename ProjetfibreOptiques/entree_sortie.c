@@ -3,7 +3,7 @@
 
 
 /*LIT LE PROCHAIN CARACTERE NON VIDE */
-char ReadChar(FILE *f)
+char ReadChar(FILE *f){
   char c ;
   do
     c = getc(f) ;

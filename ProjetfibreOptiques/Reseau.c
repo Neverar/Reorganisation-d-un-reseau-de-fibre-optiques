@@ -1,10 +1,11 @@
 #include<stdlib.h>
 #include<stdio.h>
 #include "Reseau.h"
+#include "Hachage.h"
 
 #define M 1000
 
-Noeud* rechercherCreeNoeudListe(Reseau *R, double x, double y) {
+Noeud* rechercheCreeNoeudListe(Reseau *R, double x, double y) {
 	if (!R) exit(0);
 
 	CellNoeud *parcoursN, *Nn;
@@ -38,7 +39,7 @@ Reseau* reconstitueReseauListe(Chaines *C) {
 	CellPoint *pp;
 	Reseau *R = malloc(sizeof(Reseau));
 	R->nbNoeuds = 0;
-	R->nbNoeuds = NULL;
+	R->noeuds = NULL;
 	R->commodites = NULL;
 	cc = R->commodites;
 	pc = C->chaines;
@@ -56,7 +57,7 @@ Reseau* reconstitueReseauListe(Chaines *C) {
 
 		while (cc) cc = cc->suiv;
 		cc = malloc(sizeof(CellCommodite));
-		cc->extrA = rechercheCreeNoeudListe(R, pc->points->x, pc->pp->y);
+		cc->extrA = rechercheCreeNoeudListe(R, pc->points->x, pc->points->y);
 		cc->extrB = extrB;
 		cc->suiv = NULL;
 
@@ -71,11 +72,11 @@ void ecrireReseauTxt(Reseau *R, FILE *f) {
 }
 
 int nbLiaison(Reseau *R) {
-
+	return 0;
 }
 
 int nbCommodite(Reseau *R) {
-
+	return 0;
 }
 
 void afficheReseauSVG(Reseau *R, char* nomInstance) {
@@ -86,16 +87,21 @@ void majDesVoisins(Noeud *noeud, Noeud *voisins) {
 	CellNoeud *pv;
 
 	pv = noeud->voisins;
-	while (pv) pv = pv->suiv;
+	while (pv) {
+		if ((pv->nd->x == voisins->x) && (pv->nd->y == voisins->y))
+			return;
+		pv = pv->suiv;
+	}
+
 	pv = malloc(sizeof(CellNoeud));
-	pv->nd = voisins;                /*A Verifier si le voisin est deja dans la liste*/
+	pv->nd = voisins;                
 	pv->suiv = NULL;
 }
 
 Noeud* rechercheCreeNoeudHachage(Reseau *R, TableHachage *H, double x, double y) {
 	if (!R || !H) exit(0);
 
-	int h = fonctionHachage(clef(x, y));
+	int h = fonctionHachage(clef(x, y), M);
 	CellNoeud *parcoursN, *parcoursL;
 
 	parcoursN = H->liste[h];
@@ -110,13 +116,13 @@ Noeud* rechercheCreeNoeudHachage(Reseau *R, TableHachage *H, double x, double y)
 	parcoursN->suiv = NULL;
 	parcoursN->nd->x = x;
 	parcoursN->nd->y = y;
-	parcourL = R->noeuds;
+	parcoursL = R->noeuds;
 	H->nbE++;
 	
 	while (parcoursL) parcoursL = parcoursL->suiv;
 	parcoursL = parcoursN;
 
-	return parcoursN;
+	return parcoursN->nd;
 }
 
 Reseau* recreeReseauHachage(Chaines *C) {
@@ -131,14 +137,14 @@ Reseau* recreeReseauHachage(Chaines *C) {
 	TableHachage *H;
 
 	R->nbNoeuds = 0;
-	R->nbNoeuds = NULL;
+	R->noeuds = NULL;
 	R->commodites = NULL;
 	cc = R->commodites;
 	pc = C->chaines;
 	H = malloc(sizeof(TableHachage));
 	H->m = M;
 	H->nbE = 0;
-	H->liste=malloc(sizeof(*CellNoeud)*M)
+	H->liste=malloc(sizeof(CellNoeud*)*M);
 	for (i = 0; i < M; i++) 
 		H->liste[i] = NULL;
 
@@ -155,7 +161,7 @@ Reseau* recreeReseauHachage(Chaines *C) {
 
 		while (cc) cc = cc->suiv;
 		cc = malloc(sizeof(CellCommodite));
-		cc->extrA = rechercheCreeNoeudHachage(R, H, pc->points->x, pc->pp->y);
+		cc->extrA = rechercheCreeNoeudHachage(R, H, pc->points->x, pc->points->y);
 		cc->extrB = extrB;
 		cc->suiv = NULL;
 

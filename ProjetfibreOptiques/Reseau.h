@@ -2,7 +2,6 @@
 #define __RESEAU_H__
 
 #include "Chaine.h"
-#include "StructHachage.h"
 
 typedef struct noeud Noeud;
 
@@ -32,6 +31,13 @@ typedef struct {
     CellNoeud *noeuds;              /* Liste des noeuds du reseau */
     CellCommodite *commodites;      /* Liste des commodites a relier */
 } Reseau;
+
+/* Tableau de la hachage */
+typedef struct {
+	int nbE;
+	int m;
+	CellNoeud **liste;
+}TableHachage;
 
 Noeud* rechercheCreeNoeudListe(Reseau *R, double x, double y);
 Reseau* reconstitueReseauListe(Chaines *C);
