@@ -9,67 +9,74 @@ Chaines* lectureChaine(FILE *f) {
 	if (!f) exit(0);
 
 	char buffe[233];
-	int i;
+	int i = 0, j;
 	CellChaine *Cc;
 	CellPoint *Cp;
 
 	Chaines *c = malloc(sizeof(Chaines));
+	if(!c) {
+		printf("echec d'alloer mermoires\n ");
+		exit(0);
+	}
 	GetChaine(f, TMAX, buffe);
 	c->nbChaines = GetEntier(f);
 	GetChaine(f, TMAX, buffe);
 	c->gamma = GetEntier(f);
 	c->chaines = NULL;
 
-	Skip(f);
-
-	while (!feof(f)) {
-		Cc = c->chaines;
-
-		while (Cc) Cc = Cc->suiv;
+	while (i != c->nbChaines) {
 
 		Cc = malloc(sizeof(CellChaine));
 		Cc->numero = GetEntier(f);
 		Cc->nbPoints = GetEntier(f);
+
 		Cc->points = NULL;
 		Cc->suiv = NULL;
-
-		for (i = 0 ; i < Cc->nbPoints; i++) {
-			Cp = Cc->points;
-
-			while (Cp) Cp = Cp->suiv;
-
+		
+		for (j = 0 ; j < Cc->nbPoints; j++) {
 			Cp = malloc(sizeof(CellPoint));
 			Cp->suiv = NULL;
 			Cp->x = GetReel(f);
 			Cp->y = GetReel(f);
+
+			Cc->points = AjouterTetePoint(Cc->points, Cp);
 		}
-	}
+
+		c->chaines = AjouterTeteChaine(c->chaines, Cc);
+		i++;
+	}	
 
 	return c;
 }
 
-/* faut modifier cette fonction a Kamil */
 void ecrireChaineTxt(Chaines *C, FILE *f) {
 	if ((!f) || (!C)) exit(0);
 	int i, k;
 
-	fprintf(f, "NbChain: %d", C->nbChaines);
-	fprintf(f, "Gamma: %d\n", C->gamma);
+	fprintf(f, "NbChain: %d\n", C->nbChaines);
+	fprintf(f, "Gamma: %d\n\n", C->gamma);
+	fprintf(stdout, "NbChain: %d\n", C->nbChaines);
+	fprintf(stdout, "Gamma: %d\n\n", C->gamma);
+
+
 
 	for (i = 0; i < C->nbChaines; i++) {
 		fprintf(f, "%d", C->chaines->numero);
+		fprintf(stdout, "%d", C->chaines->numero);
 		fprintf(f, " %d", C->chaines->nbPoints);
+		fprintf(stdout, " %d", C->chaines->nbPoints);
 		
 		for (k = 0; k < C->chaines->nbPoints; k++) {
-			fprintf(f, "%.2f %.2f", C->chaines->points->x, C->chaines->points->y);
-			C->chaines->points = C->chaines->points->suiv;     /* ne faut pas se effectuer sur lui-meme, sinon ce pointeur va chager. Dois creer un parcours pour imcrementer la liste */
+			fprintf(f, " %.2f %.2f", C->chaines->points->x, C->chaines->points->y);
+			fprintf(stdout, " %.2f %.2f", C->chaines->points->x, C->chaines->points->y);
+			C->chaines->points = C->chaines->points->suiv;     
 		}
 		
-		C->chaines = C->chaines->suiv;             /* Pareil de ce dessus */
+		C->chaines = C->chaines->suiv;             
 		fprintf(f, "\n");
+		fprintf(stdout, "\n");
 	}
 	
-	fclose(f);
 }
 
 void afficheChaineSVG(Chaines *C, char* nomInstance) {
@@ -87,7 +94,7 @@ void afficheChaineSVG(Chaines *C, char* nomInstance) {
 		SVGlineRandColor(svg);
 		parcoursP = parcoursC->points;
 
-		while (parcoursP->suiv) {
+		while (parcoursP->suiv->suiv) {
 			SVGpoint(svg, parcoursP->x, parcoursP->y);
 			SVGpoint(svg, parcoursP->suiv->x, parcoursP->suiv->y);
 			SVGline(svg, parcoursP->x, parcoursP->y, parcoursP->suiv->x, parcoursP->suiv->y);
@@ -107,9 +114,7 @@ double longueurTotale(Chaines *C) {
 	double sommeTotal = 0;
 	for (i = 0; i < C->nbChaines; i++) {
 		for (k = 0; k < (C->chaines->nbPoints - 1); k++) {
-			/* Essais a diminuer la longuer de ce qui dans les parentheses de sqrt, sinon je sais pas pourquoi la compation va rendre une eurrer*/
-			/*Ou bien tu peux creer un variable pour stocker la valeur dans la parenthese */
-		
+			
 			sommeUneChaine = sommeUneChaine + sqrt((C->chaines->points->suiv->x - C->chaines->points->x)*(C->chaines->points->suiv->x - C->chaines->points->x) +
 				(C->chaines->points->suiv->y - C->chaines->points->y)*(C->chaines->points->suiv->y - C->chaines->points->y));  
 
@@ -135,4 +140,16 @@ int comptePointsTotal(Chaines *C) {
 		parcoursC = parcoursC->suiv;
 	}
 	return cpt;
+}
+
+CellPoint* AjouterTetePoint(CellPoint* p, CellPoint* Nouv)
+{
+	Nouv->suiv = p;
+	return Nouv;
+}
+
+CellChaine* AjouterTeteChaine(CellChaine* c, CellChaine* Nouv)
+{
+	Nouv->suiv = c;
+	return Nouv;
 }

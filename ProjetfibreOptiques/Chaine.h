@@ -29,4 +29,7 @@ void afficheChaineSVG(Chaines *C, char* nomInstance);
 double longueurTotale(Chaines *C);
 int comptePointsTotal(Chaines *C);
 
+CellPoint* AjouterTetePoint(CellPoint* p, CellPoint* Nouv);
+CellChaine* AjouterTeteChaine(CellChaine* c, CellChaine* Nouv);
+
 #endif	

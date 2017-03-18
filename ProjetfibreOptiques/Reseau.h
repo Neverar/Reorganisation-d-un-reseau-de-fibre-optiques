@@ -45,7 +45,10 @@ void ecrireReseauTxt(Reseau *R, FILE *f);
 int nbLiaison(Reseau *R);
 int nbCommodite(Reseau *R);
 void afficheReseauSVG(Reseau *R, char* nomInstance);
-void majDesVoisins(Noeud *noeud, Noeud *voisin);
+void majDesVoisins(Noeud *noeud, Noeud *voisins);
+int** AjouterVerifLiaison(int **Liaison, int a, int b);
+CellNoeud* AjouterTeteNoeud(CellNoeud* n, Noeud* Nouv);
+CellCommodite* AjouterTeteCommodite(CellCommodite* c, Noeud* A, Noeud* B);
 
 Noeud* rechercheCreeNoeudHachage(Reseau *R, TableHachage *H, double x, double y);
 Reseau* recreeReseauHachage(Chaines *C);

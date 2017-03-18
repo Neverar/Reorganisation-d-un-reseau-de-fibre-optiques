@@ -8,7 +8,8 @@
 Noeud* rechercheCreeNoeudListe(Reseau *R, double x, double y) {
 	if (!R) exit(0);
 
-	CellNoeud *parcoursN, *Nn;
+	CellNoeud *parcoursN;
+	Noeud* Nn;
 	parcoursN = R->noeuds;
 
 	while (parcoursN) {
@@ -17,31 +18,28 @@ Noeud* rechercheCreeNoeudListe(Reseau *R, double x, double y) {
 		parcoursN = parcoursN->suiv;
 	}
 
-	Nn = malloc(sizeof(CellNoeud));
-	Nn->suiv = NULL;
-	Nn->nd = malloc(sizeof(Noeud));
-	Nn->nd->num = R->nbNoeuds;
-	Nn->nd->x = x;
-	Nn->nd->y = y;
-	Nn->nd->voisins = NULL;
-	parcoursN = Nn;
-	R->nbNoeuds += 1;
+	Nn = malloc(sizeof(Noeud));
+	Nn->x = x;
+	Nn->y = y;
+	Nn->voisins = NULL;
+	R->nbNoeuds +=1;
+	Nn->num = R->nbNoeuds;
+	R->noeuds = AjouterTeteNoeud(R->noeuds, Nn);
 
-	return parcoursN->nd;
+	return Nn;  
 }
 
 Reseau* reconstitueReseauListe(Chaines *C) {
 	if (!C) exit(0);
 
 	Noeud *extrA, *extrB;
-	CellCommodite *cc;
 	CellChaine *pc;
 	CellPoint *pp;
 	Reseau *R = malloc(sizeof(Reseau));
 	R->nbNoeuds = 0;
 	R->noeuds = NULL;
 	R->commodites = NULL;
-	cc = R->commodites;
+	R->gamma = C->gamma;
 	pc = C->chaines;
 
 	while (pc) {
@@ -50,33 +48,100 @@ Reseau* reconstitueReseauListe(Chaines *C) {
 		while (pp->suiv) {
 			extrA = rechercheCreeNoeudListe(R, pp->x, pp->y);
 			extrB = rechercheCreeNoeudListe(R, pp->suiv->x, pp->suiv->y);
-			majDesVoisins(extrA, extrB);
+			majDesVoisins(extrA, extrB);        /* Adresse de extrA? */
 			majDesVoisins(extrB, extrA);
 			pp = pp->suiv;
 		}
-
-		while (cc) cc = cc->suiv;
-		cc = malloc(sizeof(CellCommodite));
-		cc->extrA = rechercheCreeNoeudListe(R, pc->points->x, pc->points->y);
-		cc->extrB = extrB;
-		cc->suiv = NULL;
-
+		extrA = rechercheCreeNoeudListe(R, pc->points->x, pc->points->y);
+		R->commodites = AjouterTeteCommodite(R->commodites, extrA, extrB);
+		
 		pc = pc->suiv;
 	}
-
+		
 	return R;
 }
 
 void ecrireReseauTxt(Reseau *R, FILE *f) {
+	if((!R)||(!f)) exit(0);
+
+	CellNoeud* parcoursN = R->noeuds, *parcoursV;
+	CellCommodite* parcoursC = R->commodites;
+	int **Liaison = malloc((sizeof(int*))*nbLiaison(R));
+	int i; 
+
+	/* Initialiser la tableau du Liaion a (-1, -1) */
+	for(i=0; i<nbLiaison(R); i++){
+		Liaison[i][0] = -1;
+		Liaison[i][1] = -1;
+	}
+
+	fprintf(f, "NbNoeuds: %d\n", R->nbNoeuds);
+	fprintf(f, "NbLiaison: %d\n", nbLiaison(R));
+	fprintf(f, "NbCommodite: %d\n", nbCommodite(R));
+	fprintf(f, "Gamma: %d\n\n", R->gamma);
+
+	while(parcoursN){
+		fprintf(f, "V %d %.6f %.6f\n", parcoursN->nd->num, parcoursN->nd->x, parcoursN->nd->y);
+		parcoursN = parcoursN->suiv;
+	}
+
+	/* On stocke touts les liaisons differants dans une tableau de liaision */
+	parcoursN = R->noeuds;
+	while(parcoursN){
+		parcoursV = parcoursN->nd->voisins;
+		
+		while(parcoursV){
+			 Liaison=AjouterVerifLiaison(Liaison, parcoursN->nd->num, parcoursV->nd->num);
+			 parcoursV=parcoursV->suiv;
+		}
+
+		parcoursN=parcoursN->suiv;
+	}
+
+	fprintf(f, "\n");
+	for(i=0; i<nbLiaison(R); i++){
+		fprintf(f, "l %d %d\n", Liaison[i][0], Liaison[i][1]);
+	}
+
+	fprintf(f, "\n");
+	while(parcoursC){
+		fprintf(f, "k %d %d\n", parcoursC->extrA->num, parcoursC->extrB->num);
+		parcoursC = parcoursC->suiv;
+	}
 
 }
 
 int nbLiaison(Reseau *R) {
-	return 0;
+	if(!R) exit(0);
+
+	int cpt=0;
+	CellNoeud* parcoursN = R->noeuds, *parcoursV;
+
+	while(parcoursN){
+		parcoursV = parcoursN->nd->voisins;
+
+		while(parcoursV){
+			cpt++;
+			parcoursV = parcoursV->suiv;
+		}
+
+		parcoursN = parcoursN->suiv;
+	}
+
+	return (cpt/2);
 }
 
 int nbCommodite(Reseau *R) {
-	return 0;
+	if(!R) exit(0);
+
+	int cpt = 0;
+	CellCommodite* parcoursC = R->commodites;
+
+	while(parcoursC){
+		cpt++;
+		parcoursC = parcoursC->suiv;
+	}
+	return cpt;
 }
 
 void afficheReseauSVG(Reseau *R, char* nomInstance) {
@@ -84,25 +149,25 @@ void afficheReseauSVG(Reseau *R, char* nomInstance) {
 }
 
 void majDesVoisins(Noeud *noeud, Noeud *voisins) {
-	CellNoeud *pv;
+	CellNoeud* pn = noeud->voisins;
 
-	pv = noeud->voisins;
-	while (pv) {
-		if ((pv->nd->x == voisins->x) && (pv->nd->y == voisins->y))
+	while(pn){
+		if(pn->nd->num == voisins->num)
 			return;
-		pv = pv->suiv;
+		pn = pn->suiv;	
 	}
 
-	pv = malloc(sizeof(CellNoeud));
-	pv->nd = voisins;                
-	pv->suiv = NULL;
+	noeud->voisins = AjouterTeteNoeud(noeud->voisins, voisins);
 }
+
+
 
 Noeud* rechercheCreeNoeudHachage(Reseau *R, TableHachage *H, double x, double y) {
 	if (!R || !H) exit(0);
 
-	int h = fonctionHachage(clef(x, y), M);
-	CellNoeud *parcoursN, *parcoursL;
+	int h = fonctionHachage(clef(x, y), H->m);
+	CellNoeud *parcoursN;
+	Noeud* Nn;
 
 	parcoursN = H->liste[h];
 	while (parcoursN) {
@@ -111,18 +176,19 @@ Noeud* rechercheCreeNoeudHachage(Reseau *R, TableHachage *H, double x, double y)
 		parcoursN = parcoursN->suiv;
 	}
 
-	parcoursN = malloc(sizeof(CellNoeud));
-	parcoursN->nd = malloc(sizeof(Noeud));
-	parcoursN->suiv = NULL;
-	parcoursN->nd->x = x;
-	parcoursN->nd->y = y;
-	parcoursL = R->noeuds;
-	H->nbE++;
 	
-	while (parcoursL) parcoursL = parcoursL->suiv;
-	parcoursL = parcoursN;
+	Nn = malloc(sizeof(Noeud));
+	Nn->x = x;
+	Nn->y = y;
+	Nn->voisins = NULL;
+	R->nbNoeuds +=1;
+	Nn->num = R->nbNoeuds;
+	R->noeuds = AjouterTeteNoeud(R->noeuds, Nn);
 
-	return parcoursN->nd;
+	H->nbE++;
+	H->liste[h] = AjouterTeteNoeud(H->liste[h], Nn);
+
+	return Nn;
 }
 
 Reseau* recreeReseauHachage(Chaines *C) {
@@ -130,16 +196,15 @@ Reseau* recreeReseauHachage(Chaines *C) {
 
 	int i;
 	Noeud *extrA, *extrB;
-	CellCommodite *cc;
 	CellChaine *pc;
 	CellPoint *pp;
 	Reseau *R = malloc(sizeof(Reseau));
 	TableHachage *H;
 
 	R->nbNoeuds = 0;
+	R->gamma = C->gamma;
 	R->noeuds = NULL;
 	R->commodites = NULL;
-	cc = R->commodites;
 	pc = C->chaines;
 	H = malloc(sizeof(TableHachage));
 	H->m = M;
@@ -159,14 +224,49 @@ Reseau* recreeReseauHachage(Chaines *C) {
 			pp = pp->suiv;
 		}
 
-		while (cc) cc = cc->suiv;
-		cc = malloc(sizeof(CellCommodite));
-		cc->extrA = rechercheCreeNoeudHachage(R, H, pc->points->x, pc->points->y);
-		cc->extrB = extrB;
-		cc->suiv = NULL;
+		extrA = rechercheCreeNoeudHachage(R, H, pc->points->x, pc->points->y);
+		R->commodites = AjouterTeteCommodite(R->commodites, extrA, extrB);
 
 		pc = pc->suiv;
 	}
 
 	return R;
+}
+
+int** AjouterVerifLiaison(int **Liaison, int a, int b){
+	int i = 0;
+	
+	while((Liaison[i][0] != -1) && (Liaison[i][1] != -1)) {
+		if((Liaison[i][0] == b) && (Liaison[i][1] == a))
+			return Liaison;
+		i++;
+	}
+
+	Liaison[i][0]=a;
+	Liaison[i][1]=b;
+	return Liaison;
+}
+
+CellNoeud* AjouterTeteNoeud(CellNoeud* n, Noeud* Nouv)
+{
+	CellNoeud* Nn = malloc(sizeof(CellNoeud));
+	Nn->nd = Nouv;
+	Nn->suiv = n;
+
+	return Nn;
+}
+
+CellCommodite* AjouterTeteCommodite(CellCommodite* c, Noeud* A, Noeud* B)
+{
+	CellCommodite* Nc = malloc(sizeof(CellCommodite));
+	Nc->extrA = A;
+	Nc->extrB = B;
+	Nc->suiv = c;
+
+	return Nc;
+}
+
+void ecrireLiaision(Reseau* R, )
+{
+	
 }
