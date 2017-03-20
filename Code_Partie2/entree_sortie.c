@@ -1,5 +1,4 @@
 #include "entree_sortie.h"
-#include <ctype.h>
 
 
 /*LIT LE PROCHAIN CARACTERE NON VIDE */
@@ -20,7 +19,7 @@ void Skip(FILE *f) {
   while (isspace(c=getc(f))) ;
   ungetc(c,f) ;
 
-}
+} 
 
 /* LECTURE DES CARACTERES JUSQU'A LA FIN DU FICHIER OU DE LA LIGNE */
 
@@ -86,11 +85,11 @@ FILE *f ;
 double GetReel(f)
 FILE *f;
 {
-  char c, ReadChar();
+  char c;
   int v,v1,puiss,i, sign;
   double nbr;
   int entrer;
-
+ 
   c = ReadChar(f);
   sign = 0;
   v = 0;v1=0;
@@ -129,6 +128,7 @@ FILE *f;
     nbr = -1*nbr;
 
   ungetc(c, f);
+
   return nbr;
 }
 
