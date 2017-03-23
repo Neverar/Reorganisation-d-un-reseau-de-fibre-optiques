@@ -18,8 +18,7 @@ void Skip(FILE *f)
 
 	char c;
 
-	while (isspace(c = getc(f)))
-		;
+	while (isspace(c = getc(f)));
 	ungetc(c, f);
 }
 
