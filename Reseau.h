@@ -1,9 +1,9 @@
 #ifndef __RESEAU_H__
 #define __RESEAU_H__
 
-#include "Chaine.h" xc
+#include "Chaine.h" 
 
-typedef struct noeud Noeud;555
+typedef struct noeud Noeud;
 
 /* Liste chainee de noeuds (pour la liste des noeuds du reseau ET les listes des voisins de chaque noeud) */
 typedef struct cellnoeud
