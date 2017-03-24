@@ -3,7 +3,7 @@
 
 #include "Chaine.h"
 
-typedef struct noeud Noeud;
+typedef struct noeud Noeud;555
 
 /* Liste chainee de noeuds (pour la liste des noeuds du reseau ET les listes des voisins de chaque noeud) */
 typedef struct cellnoeud
