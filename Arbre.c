@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "Arbre.h"
-
+/***/
 void chaineCoordMinMax(Chaines *C, double *xmin, double *ymin, double *xmax, double *ymax)
 {
     if (!C)
