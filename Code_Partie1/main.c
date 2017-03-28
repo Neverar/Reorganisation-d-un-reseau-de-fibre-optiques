@@ -61,10 +61,10 @@ int main(int argc, char *argv[])
 			}
 
 			while ((ptr = readdir(dir)) != NULL) {
-				if ((strcmp(ptr->d_name, "..") != 0) && (strcmp(ptr->d_name, ".") != 0))
+				if ((strcmp(ptr->d_name, "..") != 0) && (strcmp(ptr->d_name, ".") != 0) && (strcmp(ptr->d_name, "desktop.ini") != 0))
 				{
 					strcpy(repoE, "Instances_cha/");
-					strcpy(repoR, "Reseaux/");
+					strcpy(repoR, "Instances_res/");
 					f = fopen(strcat(repoE, ptr->d_name), "rb");
 					c = lectureChaine(f);
 					strcpy(fr, ptr->d_name);
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 			}
 
 			while ((ptr = readdir(dir)) != NULL) {
-				if ((strcmp(ptr->d_name, "..") != 0) && (strcmp(ptr->d_name, ".") != 0))
+				if ((strcmp(ptr->d_name, "..") != 0) && (strcmp(ptr->d_name, ".") != 0) && (strcmp(ptr->d_name, "desktop.ini") != 0))
 				{
 					strcpy(repoE, "Instances_cha/");
 					strcpy(repoR, "Tmps/");
